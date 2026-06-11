@@ -1,0 +1,39 @@
+# --- WordPress: track only our custom plugin ---
+
+# WP core (managed by WordPress, never version-controlled)
+/wp-admin/
+/wp-includes/
+/wp-*.php
+/index.php
+/xmlrpc.php
+/license.txt
+/readme.html
+/.htaccess
+/.htaccess.bk
+
+# Secrets / config — NEVER commit
+wp-config.php
+.env
+.env.*
+*.pem
+*.key
+
+# Uploads & generated content
+/wp-content/uploads/
+/wp-content/upgrade/
+/wp-content/cache/
+/wp-content/languages/
+
+# Everything under plugins/themes except our own plugin
+/wp-content/plugins/*
+!/wp-content/plugins/healthfest-registration/
+/wp-content/themes/*
+
+# Archives / logs / OS cruft
+*.zip
+*.tar
+*.gz
+error_log
+*.log
+.DS_Store
+Thumbs.db

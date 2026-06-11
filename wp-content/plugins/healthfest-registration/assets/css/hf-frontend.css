@@ -1,0 +1,201 @@
+/* HealthFest Registration — front-end form. Mobile-first, theme-neutral. */
+
+.hf-registration {
+	max-width: 720px;
+	margin: 0 auto;
+	font-size: 16px;
+	line-height: 1.5;
+}
+
+.hf-registration .hf-heading {
+	margin: 0 0 .25em;
+}
+
+.hf-registration .hf-intro {
+	margin: 0 0 1.25em;
+	opacity: .85;
+}
+
+.hf-form fieldset {
+	border: 1px solid rgba(0, 0, 0, .12);
+	border-radius: 10px;
+	padding: 1em 1.1em 1.1em;
+	margin: 0 0 1.25em;
+}
+
+.hf-form legend {
+	font-weight: 600;
+	padding: 0 .4em;
+}
+
+.hf-day {
+	margin: 1em 0 .4em;
+	font-size: 1.05em;
+}
+
+.hf-day-list {
+	display: grid;
+	gap: .55em;
+}
+
+/* Workshop choice card */
+.hf-workshop {
+	display: flex;
+	align-items: flex-start;
+	gap: .7em;
+	padding: .7em .8em;
+	border: 1px solid rgba(0, 0, 0, .12);
+	border-radius: 10px;
+	cursor: pointer;
+	transition: border-color .15s, background-color .15s;
+}
+
+.hf-workshop:hover {
+	border-color: rgba(0, 0, 0, .28);
+}
+
+.hf-workshop input {
+	margin-top: .25em;
+	flex: 0 0 auto;
+	width: 20px;
+	height: 20px;
+}
+
+.hf-w-body {
+	display: flex;
+	flex-direction: column;
+	gap: .15em;
+	flex: 1 1 auto;
+}
+
+.hf-w-title {
+	font-weight: 600;
+}
+
+.hf-w-time,
+.hf-w-presenter,
+.hf-w-location {
+	font-size: .9em;
+	opacity: .8;
+}
+
+.hf-w-seats {
+	margin-top: .25em;
+}
+
+.hf-badge {
+	display: inline-block;
+	font-size: .8em;
+	padding: .15em .6em;
+	border-radius: 999px;
+	background: rgba(40, 140, 90, .12);
+	color: #1c6b43;
+}
+
+.hf-badge-full {
+	background: rgba(180, 40, 40, .12);
+	color: #9a2727;
+}
+
+.hf-workshop.hf-is-full {
+	opacity: .6;
+	cursor: not-allowed;
+}
+
+/* Contact fields */
+.hf-field {
+	display: flex;
+	flex-direction: column;
+	gap: .3em;
+	margin: 0 0 .9em;
+}
+
+.hf-field label {
+	font-weight: 500;
+}
+
+.hf-field input {
+	padding: .65em .7em;
+	border: 1px solid rgba(0, 0, 0, .25);
+	border-radius: 8px;
+	font-size: 1em;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.hf-req {
+	color: #9a2727;
+}
+
+/* Consents */
+.hf-consent {
+	margin: 0 0 .7em;
+}
+
+.hf-consent label {
+	display: flex;
+	align-items: flex-start;
+	gap: .6em;
+	cursor: pointer;
+}
+
+.hf-consent input {
+	margin-top: .25em;
+	width: 18px;
+	height: 18px;
+	flex: 0 0 auto;
+}
+
+.hf-cancellation-note {
+	font-size: .9em;
+	opacity: .85;
+	background: rgba(0, 0, 0, .04);
+	border-left: 3px solid rgba(0, 0, 0, .25);
+	padding: .6em .8em;
+	border-radius: 4px;
+}
+
+/* Feedback + submit */
+.hf-message {
+	margin: 1em 0;
+	padding: 0;
+}
+
+.hf-message.hf-ok,
+.hf-message.hf-err {
+	padding: .8em 1em;
+	border-radius: 8px;
+}
+
+.hf-message.hf-ok {
+	background: rgba(40, 140, 90, .12);
+	color: #1c6b43;
+}
+
+.hf-message.hf-err {
+	background: rgba(180, 40, 40, .12);
+	color: #9a2727;
+}
+
+.hf-submit {
+	display: inline-block;
+	padding: .8em 1.6em;
+	font-size: 1em;
+	font-weight: 600;
+	border: 0;
+	border-radius: 10px;
+	cursor: pointer;
+	color: #fff;
+	background: #1c6b43;
+}
+
+.hf-submit:disabled {
+	opacity: .6;
+	cursor: progress;
+}
+
+@media (min-width: 600px) {
+	.hf-day-list {
+		grid-template-columns: 1fr 1fr;
+	}
+}
