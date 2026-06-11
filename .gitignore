@@ -37,3 +37,6 @@ error_log
 *.log
 .DS_Store
 Thumbs.db
+
+# Local-only working docs (not committed, not deployed; readable by Claude)
+plan.md
