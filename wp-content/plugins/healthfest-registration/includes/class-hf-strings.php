@@ -52,6 +52,7 @@ class HF_Strings {
 			'must_accept_privacy' => 'Trebuie să accepți prelucrarea datelor pentru a te înscrie.',
 			'success'             => 'Înscriere reușită! Vei primi un e-mail de confirmare.',
 			'error_generic'       => 'A apărut o eroare. Te rugăm să încerci din nou.',
+			'rate_limited'        => 'Prea multe încercări. Te rugăm să aștepți câteva minute și să încerci din nou.',
 			'already_registered'  => 'Ești deja înscris(ă) la acest atelier.',
 			'workshop_full'       => 'Ne pare rău, atelierul s-a umplut între timp.',
 			'no_workshops'        => 'Momentan nu există ateliere disponibile pentru înscriere.',

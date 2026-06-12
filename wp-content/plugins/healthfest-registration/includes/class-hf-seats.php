@@ -50,6 +50,23 @@ class HF_Seats {
 	}
 
 	/**
+	 * Whether a canonical workshop still exists and is registerable (not trashed
+	 * or deleted). Guards against an editor trashing/deleting the default-language
+	 * post out from under live seat rows — without this, availability lookups and
+	 * reservations would resolve to an orphaned counter for a workshop that no
+	 * longer exists. reason: Polylang canonical post could be removed mid-event.
+	 *
+	 * @param int $canonical_id Canonical workshop post ID.
+	 * @return bool
+	 */
+	private static function canonical_exists( $canonical_id ) {
+		$status = get_post_status( $canonical_id );
+
+		// get_post_status() returns false for a non-existent post.
+		return ( false !== $status && 'trash' !== $status );
+	}
+
+	/**
 	 * Fully-qualified seat-counter table name.
 	 *
 	 * @return string
@@ -70,6 +87,18 @@ class HF_Seats {
 
 		$cid   = self::canonical_id( $workshop_id );
 		$table = self::table();
+
+		// Workshop was trashed/deleted out from under its seat row — report it as
+		// closed so the front end shows it full rather than erroring on a ghost.
+		if ( ! self::canonical_exists( $cid ) ) {
+			return array(
+				'workshop_id' => $cid,
+				'limit'       => 0,
+				'taken'       => 0,
+				'remaining'   => 0,
+				'is_full'     => true,
+			);
+		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table.
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT seat_limit, seats_taken FROM {$table} WHERE workshop_id = %d", $cid ), ARRAY_A );
@@ -100,6 +129,13 @@ class HF_Seats {
 		global $wpdb;
 
 		$cid = self::canonical_id( $workshop_id );
+
+		// Refuse to book a seat against a trashed/deleted workshop rather than
+		// silently incrementing an orphaned counter.
+		if ( ! self::canonical_exists( $cid ) ) {
+			return false;
+		}
+
 		self::ensure_row( $cid );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- atomic guarded counter update.

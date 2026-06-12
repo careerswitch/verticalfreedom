@@ -31,6 +31,39 @@ class HF_Activator {
 	}
 
 	/**
+	 * Run idempotent schema migrations when the installed DB version is behind the
+	 * code's HF_DB_VERSION. Called on every load (cost: one option read) so schema
+	 * changes ship on plugin *update*, not only on manual re-activation.
+	 *
+	 * dbDelta is idempotent, so re-running create_tables() for a forward migration
+	 * is safe; add version-specific data migrations below the dbDelta call as the
+	 * schema evolves. reason: activate() only runs on activation, so updates that
+	 * bumped HF_DB_VERSION never migrated existing installs.
+	 *
+	 * @return void
+	 */
+	public static function maybe_upgrade() {
+		$installed = get_option( 'hf_db_version' );
+
+		// No stored version means the plugin was never activated — activate() owns
+		// fresh installs; nothing to migrate here.
+		if ( false === $installed ) {
+			return;
+		}
+
+		if ( (string) $installed === (string) HF_DB_VERSION ) {
+			return;
+		}
+
+		self::create_tables();
+
+		// Future per-version data migrations go here, e.g.:
+		// if ( version_compare( $installed, '2', '<' ) ) { /* backfill ... */ }
+
+		update_option( 'hf_db_version', HF_DB_VERSION );
+	}
+
+	/**
 	 * Create or update the plugin's custom tables.
 	 *
 	 * Uses dbDelta, which is idempotent — safe to run on every activation and

@@ -25,7 +25,7 @@ Build a **self-contained custom WordPress plugin** (no recurring license, data o
 
 **Engineering (definition of done):**
 - Seat enforcement is **atomic** — concurrent submissions cannot oversell the last seat.
-- Server-side validation on every field; nonce/CSRF protection; capability checks on all admin actions; prepared statements for all DB access.
+- Server-side validation on every field; nonce/CSRF protection; capability checks on all admin actions; prepared statements for all DB access; **per-IP rate limiting** on the public registration endpoint (nonce alone is insufficient — guest nonces are shared).
 - Developed and verified on **staging** (`staging.verticalfreedom.org`) before any production deploy.
 - Confirmation emails deliver reliably (SMTP configured, not raw PHP `mail()`).
 
@@ -77,7 +77,7 @@ Build a **self-contained custom WordPress plugin** (no recurring license, data o
 - Develop/test on **staging** before production.
 - **Multiple workshops per participant** — one participant record, many registrations (one per workshop). A participant cannot register for the same workshop twice.
 - **Hard close** when a workshop is full — no waitlist.
-- **Admin-cancellable** registrations (cancelling frees the seat). The registration form and confirmation email must include **a clear sentence instructing participants that cancellations have to be reported** to the organizer so the seat can be released.
+- **Admin-cancellable** registrations (cancelling frees the seat). The registration form and confirmation email must include **a clear sentence instructing participants that cancellations have to be reported** to the organizer so the seat can be released. A participant whose registration was cancelled **may sign up again** for the same workshop (re-registration revives the existing record rather than being blocked by the duplicate-prevention key).
 - **Photo/video consent is optional** (captured separately; not required to register). Privacy/GDPR consent remains required.
 - **Event: HealthFest, 26–28 June 2026** (Fri–Sun), Romanian-primary content. Source schedule: `Program terapeuti Healthfest.xlsx` (note: a "27.05" in the sheet means **27.06**).
 - **Phase 1 = group workshops only** (seat-limited *ateliere*, ~19 across 3 days). The **individual 1-on-1 sessions** (therapist availability windows) are **deferred** — they're appointment-style, a different model.

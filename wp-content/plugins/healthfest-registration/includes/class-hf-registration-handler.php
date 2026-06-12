@@ -33,6 +33,33 @@ class HF_Registration_Handler {
 	}
 
 	/**
+	 * Transient-backed per-IP throttle for the registration endpoint.
+	 *
+	 * Permits HF_RATE_LIMIT_MAX submissions per HF_RATE_LIMIT_WINDOW seconds from a
+	 * single client IP. Fails OPEN when the IP can't be determined, so a proxy quirk
+	 * never blocks a legitimate participant. The window resets on each counted hit,
+	 * which keeps a sustained attacker blocked while letting a quiet IP recover.
+	 *
+	 * @return bool True if the request is under the limit.
+	 */
+	private function within_rate_limit() {
+		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		if ( '' === $ip ) {
+			return true; // Can't identify the caller — don't block.
+		}
+
+		$key   = 'hf_rl_' . md5( $ip );
+		$count = (int) get_transient( $key );
+
+		if ( $count >= (int) HF_RATE_LIMIT_MAX ) {
+			return false;
+		}
+
+		set_transient( $key, $count + 1, (int) HF_RATE_LIMIT_WINDOW );
+		return true;
+	}
+
+	/**
 	 * Process a registration submission. Responds with JSON.
 	 *
 	 * @return void
@@ -40,6 +67,12 @@ class HF_Registration_Handler {
 	public function handle_register() {
 		if ( ! check_ajax_referer( 'hf_register', 'nonce', false ) ) {
 			wp_send_json_error( array( 'message' => HF_Strings::t( 'error_generic' ) ), 400 );
+		}
+
+		// Throttle scripted floods before doing any DB work. The nonce is weak here
+		// (nopriv nonces are shared across guests for ~24h), so cap per-IP volume.
+		if ( ! $this->within_rate_limit() ) {
+			wp_send_json_error( array( 'message' => HF_Strings::t( 'rate_limited' ) ), 429 );
 		}
 
 		$first = isset( $_POST['first_name'] ) ? sanitize_text_field( wp_unslash( $_POST['first_name'] ) ) : '';
@@ -245,13 +278,48 @@ class HF_Registration_Handler {
 	private function insert_registration( $participant_id, $workshop_id ) {
 		global $wpdb;
 		$table = $wpdb->prefix . 'hf_registrations';
-		$ok    = $wpdb->insert(
+		$now   = current_time( 'mysql' );
+
+		// UNIQUE(participant_id, workshop_id) keeps cancelled rows on file, so a
+		// plain INSERT for a participant who previously cancelled this workshop
+		// hits the constraint, fails silently, and permanently blocks re-joining.
+		// Revive the existing row instead. reason: cancel→re-register was broken.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- custom plugin table.
+		$existing = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT id, status FROM {$table} WHERE participant_id = %d AND workshop_id = %d",
+				$participant_id,
+				$workshop_id
+			)
+		);
+
+		if ( $existing ) {
+			// Already confirmed (e.g. a concurrent duplicate submission that slipped
+			// past the application-level check): signal failure so the caller releases
+			// the seat it just reserved. The DB UNIQUE key remains the final guard.
+			if ( 'confirmed' === $existing->status ) {
+				return 0;
+			}
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- revive cancelled row.
+			$revived = $wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$table} SET status = 'confirmed', created_at = %s, cancelled_at = NULL, cancelled_by = NULL WHERE id = %d",
+					$now,
+					(int) $existing->id
+				)
+			);
+
+			return ( false !== $revived ) ? (int) $existing->id : 0;
+		}
+
+		$ok = $wpdb->insert(
 			$table,
 			array(
 				'participant_id' => $participant_id,
 				'workshop_id'    => $workshop_id,
 				'status'         => 'confirmed',
-				'created_at'     => current_time( 'mysql' ),
+				'created_at'     => $now,
 			),
 			array( '%d', '%d', '%s', '%s' )
 		);
