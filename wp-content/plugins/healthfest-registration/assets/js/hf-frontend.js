@@ -29,6 +29,8 @@
 	function refreshAvailability() {
 		var body = new URLSearchParams();
 		body.append( 'action', 'hf_availability' );
+		// Match the page language so the counts come back keyed by this page's IDs.
+		body.append( 'lang', DATA.lang || 'ro' );
 
 		fetch( DATA.ajaxUrl, { method: 'POST', body: body, credentials: 'same-origin' } )
 			.then( function ( r ) { return r.json(); } )
@@ -89,6 +91,9 @@
 		var fd = new FormData( form );
 		fd.append( 'action', 'hf_register' );
 		fd.append( 'nonce', DATA.nonce );
+		// Carry the page language so the email + server messages localise correctly
+		// (admin-ajax has no page context for Polylang to detect it from).
+		fd.append( 'lang', DATA.lang || 'ro' );
 
 		if ( btn ) { btn.disabled = true; }
 		showMessage( msg, '…', null );

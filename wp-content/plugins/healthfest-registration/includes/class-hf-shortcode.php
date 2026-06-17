@@ -43,8 +43,13 @@ class HF_Shortcode {
 	/**
 	 * Fetch published workshops for the current language, ordered by start time.
 	 *
-	 * Polylang automatically scopes the query to the current language, so each
-	 * language's page shows its own workshop posts (sharing one seat pool).
+	 * The query is explicitly scoped to the active language (belt-and-suspenders on
+	 * top of Polylang's own filter) so the page can never list both the RO and EN
+	 * copy of a workshop together — each language shows only its own 17.
+	 *
+	 * Ordering is done in PHP, not SQL: the schedule meta lives only on the canonical
+	 * (Romanian) post, so a translated copy has no _hf_start_datetime to order by —
+	 * an SQL meta-sort would silently drop every EN post from the list.
 	 *
 	 * @return WP_Post[]
 	 */
@@ -54,13 +59,24 @@ class HF_Shortcode {
 				'post_type'      => HF_Workshop_CPT::POST_TYPE,
 				'post_status'    => 'publish',
 				'posts_per_page' => 200,
-				'meta_key'       => '_hf_start_datetime',
-				'orderby'        => 'meta_value',
+				'lang'           => HF_Strings::current_lang(),
+				'orderby'        => 'title',
 				'order'          => 'ASC',
 				'no_found_rows'  => true,
 			)
 		);
-		return $query->posts;
+		$posts = $query->posts;
+
+		usort(
+			$posts,
+			static function ( $a, $b ) {
+				$ta = HF_Util::parse_dt( (string) get_post_meta( HF_Seats::canonical_id( $a->ID ), '_hf_start_datetime', true ) );
+				$tb = HF_Util::parse_dt( (string) get_post_meta( HF_Seats::canonical_id( $b->ID ), '_hf_start_datetime', true ) );
+				return $ta['ts'] <=> $tb['ts'];
+			}
+		);
+
+		return $posts;
 	}
 
 	/**
@@ -87,6 +103,7 @@ class HF_Shortcode {
 			array(
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'hf_register' ),
+				'lang'    => HF_Strings::current_lang(),
 				'strings' => HF_Strings::localized(),
 			)
 		);
@@ -110,8 +127,13 @@ class HF_Shortcode {
 		echo '<fieldset class="hf-workshops"><legend>' . esc_html( HF_Strings::t( 'choose_workshops' ) ) . '</legend>';
 		$current_day = null;
 		foreach ( $workshops as $post ) {
-			$start = $this->parse_dt( (string) get_post_meta( $post->ID, '_hf_start_datetime', true ) );
-			$end   = $this->parse_dt( (string) get_post_meta( $post->ID, '_hf_end_datetime', true ) );
+			// Schedule/presenter/location are language-neutral and authored once on
+			// the canonical (Romanian) post, so read them from there — the English
+			// translation only needs a title + description. reason: avoids forcing
+			// the organizer to re-enter logistics on every secondary-language copy.
+			$cid   = HF_Seats::canonical_id( $post->ID );
+			$start = $this->parse_dt( (string) get_post_meta( $cid, '_hf_start_datetime', true ) );
+			$end   = $this->parse_dt( (string) get_post_meta( $cid, '_hf_end_datetime', true ) );
 			if ( $start['day'] !== $current_day ) {
 				if ( null !== $current_day ) {
 					echo '</div>';
@@ -121,8 +143,8 @@ class HF_Shortcode {
 			}
 
 			$avail      = HF_Seats::availability( $post->ID );
-			$presenter  = (string) get_post_meta( $post->ID, '_hf_presenter', true );
-			$location   = (string) get_post_meta( $post->ID, '_hf_location', true );
+			$presenter  = (string) get_post_meta( $cid, '_hf_presenter', true );
+			$location   = (string) get_post_meta( $cid, '_hf_location', true );
 			$time_range = trim( $start['time'] . ( $end['time'] ? '–' . $end['time'] : '' ) );
 
 			printf(

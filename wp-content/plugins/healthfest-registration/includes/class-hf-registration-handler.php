@@ -65,6 +65,12 @@ class HF_Registration_Handler {
 	 * @return void
 	 */
 	public function handle_register() {
+		// Localise every response message and the confirmation email to the page
+		// the visitor submitted from. admin-ajax has no page context, so without
+		// this Polylang reports the default (Romanian) for an English registrant.
+		// reason: confirmation emails went out in Romanian to English sign-ups.
+		HF_Strings::set_lang( isset( $_POST['lang'] ) ? sanitize_key( wp_unslash( $_POST['lang'] ) ) : null );
+
 		if ( ! check_ajax_referer( 'hf_register', 'nonce', false ) ) {
 			wp_send_json_error( array( 'message' => HF_Strings::t( 'error_generic' ) ), 400 );
 		}
@@ -179,15 +185,26 @@ class HF_Registration_Handler {
 	 * @return void
 	 */
 	public function handle_availability() {
-		$query = new WP_Query(
-			array(
-				'post_type'      => HF_Workshop_CPT::POST_TYPE,
-				'post_status'    => 'publish',
-				'posts_per_page' => 200,
-				'fields'         => 'ids',
-				'no_found_rows'  => true,
-			)
+		// Scope to the calling page's language so the response is keyed by the SAME
+		// post IDs the form rendered (the EN tiles carry EN post IDs). admin-ajax has
+		// no page context, so without this the query defaults to Romanian and the EN
+		// page's live refresh would never match its tiles.
+		$lang = isset( $_POST['lang'] ) ? sanitize_key( wp_unslash( $_POST['lang'] ) ) : '';
+
+		$args = array(
+			'post_type'      => HF_Workshop_CPT::POST_TYPE,
+			'post_status'    => 'publish',
+			'posts_per_page' => 200,
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
 		);
+		// Pass the real Polylang slug through (Polylang validates it against the
+		// registered languages, so an unknown value simply yields no rows).
+		if ( '' !== $lang ) {
+			$args['lang'] = $lang;
+		}
+
+		$query = new WP_Query( $args );
 
 		$out = array();
 		foreach ( $query->posts as $id ) {

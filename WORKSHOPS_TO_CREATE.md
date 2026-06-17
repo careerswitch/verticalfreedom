@@ -11,7 +11,7 @@ Phase 1 = group workshops only. The "Sesiuni individuale" (1-on-1) rows are **de
 3. **Description** (the main editor body) → paste the Romanian description.
 4. **Workshop Details** sidebar → fill **Seat limit**, **Presenter / Therapist**, **Start**, **End**, **Location** from the block.
 5. **Publish.**
-6. To add the English version: in the **Languages** box, click the **＋** under the UK flag and translate the **Title** + **Description**. *Seat limit / Start / End / Location carry over — the seat limit field is read-only on the English copy by design.*
+6. To add the English version: in the **Languages** box, click the **＋** under the UK flag and paste **only the English Title + Description** from the *English versions* section below. *Seat limit, schedule, presenter and location are read-only on the English copy — they come automatically from the Romanian version, so there is nothing else to fill in.*
 
 > All 17 appear on one page via the single **`[healthfest_registration]`** shortcode, auto-grouped by day with their times — no per-workshop code needed.
 
@@ -88,7 +88,7 @@ Phase 1 = group workshops only. The "Sesiuni individuale" (1-on-1) rows are **de
 - Description: Practică blândă de yoga, adaptată pentru relaxarea corpului și a minții. Exerciții de mișcare și respirație potrivite pentru toate nivelurile, fără experiență prealabilă.
 
 **8 / 17**
-- Title:       Theta + Reiki
+- Title:       Theta Healing & Reiki
 - Presenter:   Oana & Virgi
 - Start:       2026-06-27 10:30
 - End:         2026-06-27 12:00
@@ -183,25 +183,73 @@ Phase 1 = group workshops only. The "Sesiuni individuale" (1-on-1) rows are **de
 
 ---
 
-## Suggested English titles (for the Polylang translation step — edit freely)
-| # | Romanian | English (suggested) |
-|---|----------|---------------------|
-| 1, 7 | Yoga terapeutică | Therapeutic Yoga |
-| 2 | Respirații Wim Hof | Wim Hof Breathing |
-| 3 | Sound Healing | Sound Healing |
-| 4 | Burnout | Burnout |
-| 5 | Emoții și presiune socială (atelier adolescenți) | Emotions & Social Pressure (teen workshop) |
-| 6 | Mindfulness | Mindfulness |
-| 8 | Theta + Reiki | Theta + Reiki |
-| 9 | Cum să te împrietenești cu emoțiile „dificile" | Befriending Your "Difficult" Emotions |
-| 10 | Creierul, emoțiile și longevitatea | The Brain, Emotions & Longevity |
-| 11 | Social media și anxietate (atelier adolescenți) | Social Media & Anxiety (teen workshop) |
-| 12 | Wing Wave – trucuri de relaxare | Wing Wave – Relaxation Techniques |
-| 13 | Yoga | Yoga |
-| 14 | Cunoașterea de sine | Self-Knowledge |
-| 15 | Stil de viață sănătos, detox și energie | Healthy Lifestyle, Detox & Energy |
-| 16 | Identitate, alegeri și direcție (atelier adolescenți) | Identity, Choices & Direction (teen workshop) |
-| 17 | Meditație | Meditation |
+## English versions (paste into the Polylang ＋ / UK-flag box)
+
+> Only the **Title** and **Description** are needed on the English copy — seat limit, schedule, presenter and location are pulled automatically from the Romanian version. Descriptions are neutral drafts; have each presenter review their own.
+
+**1 / 17** (and **7 / 17** — same workshop)
+- Title:       Therapeutic Yoga
+- Description: A gentle yoga practice adapted to relax both body and mind. Movement and breathing exercises suitable for all levels — no prior experience needed.
+
+**2 / 17**
+- Title:       Wim Hof Breathing
+- Description: An introduction to the Wim Hof Method: conscious breathing techniques for more energy, mental clarity and better stress management. Wear comfortable clothes.
+
+**3 / 17**
+- Title:       Sound Healing
+- Description: A deeply relaxing experience through sound and vibration. Let the harmonies of the instruments carry you and release built-up tension.
+
+**4 / 17**
+- Title:       Burnout
+- Description: A workshop on recognising and preventing exhaustion. Practical tools to restore your energy and rebuild the balance between your personal and professional life.
+
+**5 / 17**
+- Title:       Emotions & Social Pressure (teen workshop)
+- Description: A safe space for teenagers, dedicated to understanding emotions and managing social pressure. Open discussion and practical exercises.
+
+**6 / 17**
+- Title:       Mindfulness
+- Description: An introduction to mindfulness practice: simple attention exercises to reduce stress and be more present in everyday life.
+
+**8 / 17**
+- Title:       Theta + Reiki
+- Description: A session of relaxation and energy balancing through Theta Healing and Reiki techniques. A moment of stillness to reconnect with yourself.
+
+**9 / 17**
+- Title:       Befriending Your "Difficult" Emotions
+- Description: A workshop on accepting and managing uncomfortable emotions. Learn to listen to them and turn them into resources instead of pushing them away.
+
+**10 / 17**
+- Title:       The Brain, Emotions & Longevity
+- Description: An accessible look at the connection between the brain, emotions and a long, healthy life. Practical insights for everyday wellbeing.
+
+**11 / 17**
+- Title:       Social Media & Anxiety (teen workshop)
+- Description: A workshop for teenagers about their relationship with social media and its effects on wellbeing. Strategies for a healthy balance online.
+
+**12 / 17**
+- Title:       Wing Wave – Relaxation Techniques
+- Description: Quick relaxation techniques based on the Wing Wave method, to ease tension and find your calm in just a few minutes.
+
+**13 / 17**
+- Title:       Yoga
+- Description: A yoga session for relaxation and revitalisation, suitable for all levels. Gentle movement and conscious breathing.
+
+**14 / 17**
+- Title:       Self-Knowledge
+- Description: A workshop of inner exploration to better understand your values, needs and direction. Reflection and awareness exercises.
+
+**15 / 17**
+- Title:       Healthy Lifestyle, Detox & Energy
+- Description: Practical ideas for a balanced lifestyle: nutrition, gentle detox, and habits that support your daily energy.
+
+**16 / 17**
+- Title:       Identity, Choices & Direction (teen workshop)
+- Description: A workshop for teenagers about discovering identity, making decisions and finding your own direction. Inspiring discussion and interactive exercises.
+
+**17 / 17**
+- Title:       Meditation
+- Description: A guided meditation session to quiet the mind and relax the body. A moment of pause and reconnection, accessible to anyone.
 
 ---
 

@@ -67,7 +67,7 @@ Build a **self-contained custom WordPress plugin** (no recurring license, data o
 6. ~~Photo/video consent required?~~ — **RESOLVED: optional.**
 7. **Email details:** Sender name/address, confirmation email content/branding, and any organizer notification email on each new registration?
 8. **SMTP provider:** Which service for outbound mail (host SMTP, or a provider like a transactional-email service)? Determines deliverability setup.
-9. **Language/localization:** Is the form English, Romanian, or bilingual? (Host is `.ro`.)
+9. ~~Language/localization~~ — **RESOLVED: bilingual.** RO primary + EN secondary; full UI (form, validation, email) ships in code and auto-switches by Polylang language. See LOGIC_GUIDE [2026-06-17].
 10. **Privacy policy:** URL of the privacy policy to link from the consent, and how its **version** is tracked for the audit log.
 11. **Data retention:** How long are participant records and consent logs kept before purge?
 

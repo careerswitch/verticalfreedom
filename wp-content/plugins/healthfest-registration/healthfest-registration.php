@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       HealthFest Registration
  * Description:       Workshop registration for HealthFest — seat-limited sign-ups, granular GDPR consent logging, CSV/Excel export, and email confirmations. Managed entirely from the WordPress admin.
- * Version:           0.4.0
+ * Version:           0.5.1
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            Vertical Freedom Foundation
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'HF_VERSION', '0.4.0' );
+define( 'HF_VERSION', '0.5.1' );
 define( 'HF_DB_VERSION', '1' );
 define( 'HF_PLUGIN_FILE', __FILE__ );
 define( 'HF_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );

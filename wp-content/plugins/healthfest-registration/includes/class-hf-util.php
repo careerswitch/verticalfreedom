@@ -74,10 +74,13 @@ class HF_Util {
 	 * @return string
 	 */
 	public static function workshop_line( $workshop_id, $title ) {
-		$start     = (string) get_post_meta( $workshop_id, '_hf_start_datetime', true );
-		$end       = (string) get_post_meta( $workshop_id, '_hf_end_datetime', true );
-		$presenter = (string) get_post_meta( $workshop_id, '_hf_presenter', true );
-		$location  = (string) get_post_meta( $workshop_id, '_hf_location', true );
+		// Logistics live on the canonical (Romanian) post; the title is passed in so
+		// the email reflects the language the participant registered in.
+		$cid       = HF_Seats::canonical_id( $workshop_id );
+		$start     = (string) get_post_meta( $cid, '_hf_start_datetime', true );
+		$end       = (string) get_post_meta( $cid, '_hf_end_datetime', true );
+		$presenter = (string) get_post_meta( $cid, '_hf_presenter', true );
+		$location  = (string) get_post_meta( $cid, '_hf_location', true );
 
 		$day   = self::parse_dt( $start )['day'];
 		$range = self::time_range( $start, $end );

@@ -123,17 +123,23 @@ class HF_Workshop_CPT {
 	public function render_meta_box( $post ) {
 		wp_nonce_field( 'hf_save_workshop', 'hf_workshop_nonce' );
 
-		$seat_limit     = (int) get_post_meta( $post->ID, '_hf_seat_limit', true );
-		$presenter      = (string) get_post_meta( $post->ID, '_hf_presenter', true );
-		$start_datetime = (string) get_post_meta( $post->ID, '_hf_start_datetime', true );
-		$end_datetime   = (string) get_post_meta( $post->ID, '_hf_end_datetime', true );
-		$location       = (string) get_post_meta( $post->ID, '_hf_location', true );
+		$is_secondary = $this->is_secondary_language( $post->ID );
+
+		// Logistics are authored once on the canonical (Romanian) post; a secondary
+		// translation only carries a translated Title + Description. Read the
+		// reference values from the canonical post so the editor sees the real
+		// schedule rather than this copy's empty fields.
+		$source_id      = $is_secondary ? HF_Seats::canonical_id( $post->ID ) : $post->ID;
+		$seat_limit     = (int) get_post_meta( $source_id, '_hf_seat_limit', true );
+		$presenter      = (string) get_post_meta( $source_id, '_hf_presenter', true );
+		$start_datetime = (string) get_post_meta( $source_id, '_hf_start_datetime', true );
+		$end_datetime   = (string) get_post_meta( $source_id, '_hf_end_datetime', true );
+		$location       = (string) get_post_meta( $source_id, '_hf_location', true );
 		$availability   = HF_Seats::availability( $post->ID );
-		$is_secondary   = $this->is_secondary_language( $post->ID );
 		?>
 		<?php if ( $is_secondary ) : ?>
 			<p class="description" style="padding:6px;background:#fff8e5;border-left:3px solid #dba617;">
-				<?php esc_html_e( 'Seat limit is managed on the Romanian (primary) version of this workshop. The value here is for reference only.', 'healthfest-registration' ); ?>
+				<?php esc_html_e( 'Seat limit, schedule, presenter and location are managed on the Romanian (primary) version of this workshop. The values here are read-only — this English copy only needs a translated title and description.', 'healthfest-registration' ); ?>
 			</p>
 		<?php endif; ?>
 		<p>
@@ -145,19 +151,19 @@ class HF_Workshop_CPT {
 		</p>
 		<p>
 			<label for="hf_presenter"><strong><?php esc_html_e( 'Presenter / Therapist', 'healthfest-registration' ); ?></strong></label><br />
-			<input type="text" id="hf_presenter" name="hf_presenter" value="<?php echo esc_attr( $presenter ); ?>" class="widefat" placeholder="<?php esc_attr_e( 'e.g. Mira, or Oana & Virgi', 'healthfest-registration' ); ?>" />
+			<input type="text" id="hf_presenter" name="hf_presenter" value="<?php echo esc_attr( $presenter ); ?>" class="widefat" placeholder="<?php esc_attr_e( 'e.g. Mira, or Oana & Virgi', 'healthfest-registration' ); ?>" <?php disabled( $is_secondary ); ?> />
 		</p>
 		<p>
 			<label for="hf_start_datetime"><strong><?php esc_html_e( 'Start (date & time)', 'healthfest-registration' ); ?></strong></label><br />
-			<input type="datetime-local" id="hf_start_datetime" name="hf_start_datetime" value="<?php echo esc_attr( $start_datetime ); ?>" class="widefat" />
+			<input type="datetime-local" id="hf_start_datetime" name="hf_start_datetime" value="<?php echo esc_attr( $start_datetime ); ?>" class="widefat" <?php disabled( $is_secondary ); ?> />
 		</p>
 		<p>
 			<label for="hf_end_datetime"><strong><?php esc_html_e( 'End (date & time)', 'healthfest-registration' ); ?></strong></label><br />
-			<input type="datetime-local" id="hf_end_datetime" name="hf_end_datetime" value="<?php echo esc_attr( $end_datetime ); ?>" class="widefat" />
+			<input type="datetime-local" id="hf_end_datetime" name="hf_end_datetime" value="<?php echo esc_attr( $end_datetime ); ?>" class="widefat" <?php disabled( $is_secondary ); ?> />
 		</p>
 		<p>
 			<label for="hf_location"><strong><?php esc_html_e( 'Location', 'healthfest-registration' ); ?></strong></label><br />
-			<input type="text" id="hf_location" name="hf_location" value="<?php echo esc_attr( $location ); ?>" class="widefat" />
+			<input type="text" id="hf_location" name="hf_location" value="<?php echo esc_attr( $location ); ?>" class="widefat" <?php disabled( $is_secondary ); ?> />
 		</p>
 		<?php
 	}
@@ -180,6 +186,14 @@ class HF_Workshop_CPT {
 			return;
 		}
 
+		// All logistics (seat limit, schedule, presenter, location) are authoritative
+		// only on the primary-language workshop. Secondary translations render these
+		// fields disabled (so they aren't submitted) and read from the canonical post,
+		// keeping a single source of truth and sparing the organizer duplicate entry.
+		if ( $this->is_secondary_language( $post_id ) ) {
+			return;
+		}
+
 		$presenter = isset( $_POST['hf_presenter'] ) ? sanitize_text_field( wp_unslash( $_POST['hf_presenter'] ) ) : '';
 		$start     = isset( $_POST['hf_start_datetime'] ) ? sanitize_text_field( wp_unslash( $_POST['hf_start_datetime'] ) ) : '';
 		$end       = isset( $_POST['hf_end_datetime'] ) ? sanitize_text_field( wp_unslash( $_POST['hf_end_datetime'] ) ) : '';
@@ -189,12 +203,9 @@ class HF_Workshop_CPT {
 		update_post_meta( $post_id, '_hf_end_datetime', $end );
 		update_post_meta( $post_id, '_hf_location', $location );
 
-		// Seat limit is authoritative only on the primary-language workshop.
-		if ( ! $this->is_secondary_language( $post_id ) ) {
-			$seat_limit = isset( $_POST['hf_seat_limit'] ) ? max( 0, (int) $_POST['hf_seat_limit'] ) : 0;
-			update_post_meta( $post_id, '_hf_seat_limit', $seat_limit );
-			HF_Seats::set_limit( $post_id, $seat_limit );
-		}
+		$seat_limit = isset( $_POST['hf_seat_limit'] ) ? max( 0, (int) $_POST['hf_seat_limit'] ) : 0;
+		update_post_meta( $post_id, '_hf_seat_limit', $seat_limit );
+		HF_Seats::set_limit( $post_id, $seat_limit );
 	}
 
 	/**
@@ -233,7 +244,8 @@ class HF_Workshop_CPT {
 	 */
 	public function render_admin_column( $column, $post_id ) {
 		if ( 'hf_presenter' === $column ) {
-			echo esc_html( (string) get_post_meta( $post_id, '_hf_presenter', true ) );
+			// Presenter is stored on the canonical post; resolve so EN rows show it.
+			echo esc_html( (string) get_post_meta( HF_Seats::canonical_id( $post_id ), '_hf_presenter', true ) );
 			return;
 		}
 		if ( 'hf_seats' !== $column ) {

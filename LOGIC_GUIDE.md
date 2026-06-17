@@ -7,6 +7,17 @@ Do not defer updates to end-of-session.
 
 ## Entries
 
+### [2026-06-17] — v0.5.1: bilingual (RO + EN) UI shipped in code; workshop logistics canonicalized
+**What:** Made the registration form, validation, confirmation email, and availability genuinely bilingual without any manual Polylang string-translation step.
+1. **Built-in EN string table.** `HF_Strings::en()` mirrors `all()` (RO). `t()` precedence: organizer Polylang String-translation override → built-in EN when the active language is not the default → Romanian. `HF_Strings::use_english()` decides by comparing the current Polylang slug to `pll_default_language()` — NOT a hardcoded `'en'` — so it works for any English slug (`en`, `en-gb`, `en-us`).
+2. **Language propagation through admin-ajax.** The shortcode passes the real Polylang slug to JS (`HF_DATA.lang`); the JS echoes it on submit + availability; the handler calls `HF_Strings::set_lang()` so the email + JSON messages localize despite admin-ajax having no page language.
+3. **Logistics canonicalized.** Seat limit, schedule, presenter, location are authored once on the canonical (RO) post and read from it everywhere (form, email, admin column). Secondary-language posts render these fields read-only and don't save them — an EN copy needs only a translated Title + Description.
+4. **Query hardening.** `get_workshops()` and the availability endpoint are scoped to the active language slug (belt-and-suspenders on Polylang's own filter; stops RO+EN both listing on one page) and the workshop list is sorted in PHP by the canonical start time.
+**Why:** v0.4.0 relied entirely on Polylang String-translations being filled in by hand (they never were), so every EN page fell back to Romanian. Two bugs surfaced on staging: (a) the check `'en' === $slug` failed because the site's English slug isn't literally `en`, leaving EN pages in Romanian while content was correctly EN-scoped; (b) canonicalizing logistics removed `_hf_start_datetime` from EN posts, and the old SQL meta-ordered query then excluded those posts entirely (empty EN list).
+**Decision — single-page day layout kept:** Considered per-day pages/tabs; kept the one-page, day-grouped form because it is one submission → one confirmation email even when a participant attends multiple days. Per-day separate pages would fragment that (multiple submissions/emails). A `day=""` shortcode attribute was discussed but not built.
+**Accepted risks:** Organizer wording overrides entered in Polylang → String translations show on the page but NOT inside the confirmation email (admin-ajax resolves overrides in the default language); the built-in EN keeps the email correctly English. Workshop *content* (titles/descriptions) is still organizer-translated in Polylang — EN drafts provided in `WORKSHOPS_TO_CREATE.md`.
+**Verified:** Staging, 2026-06-17 — EN page renders English UI + the translated workshop(s) with correct schedule and live seat counts; RO page unchanged; shared seat pool confirmed across languages.
+
 ### [2026-06-12] — v0.4.0 hardening pass: cancel/re-register fix, rate limiting, orphaned-seat guard, migration routine
 **What:** Four changes after an architecture review of v0.3.0.
 1. **Cancel → re-register bug (correctness).** `insert_registration()` now *revives* a cancelled row (UPDATE status→confirmed, clear `cancelled_at/by`) instead of a plain INSERT. A confirmed row still returns 0 so the caller releases the just-reserved seat.
